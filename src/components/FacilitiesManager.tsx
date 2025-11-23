@@ -264,7 +264,7 @@ const FacilitiesManager = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-semibold">Facilities</h3>
-          <Button onClick={() => { setShowFacilityForm(true); setEditingFacility(null); setFacilityForm({ icon: 'BookOpen', title: '', description: '', features: [], image: 'bg-gradient-to-br from-blue-600/20 to-purple-600/20' }); }}>
+          <Button onClick={() => { setShowFacilityForm(true); setEditingFacility(null); setFacilityForm({ icon: 'BookOpen', title: '', description: '', features: [], image: 'bg-gradient-to-br from-blue-600/20 to-purple-600/20' }); }} className="text-white">
             <Plus className="h-4 w-4 mr-2" />
             Add Facility
           </Button>
@@ -410,7 +410,7 @@ const FacilitiesManager = () => {
 
         <div className="flex items-center justify-between pt-8">
           <h3 className="text-2xl font-semibold">Campus Statistics</h3>
-          <Button onClick={() => { setShowStatForm(true); setEditingStat(null); setStatForm({ value: '', label: '' }); }}>
+          <Button onClick={() => { setShowStatForm(true); setEditingStat(null); setStatForm({ value: '', label: '' }); }} className="text-white">
             <Plus className="h-4 w-4 mr-2" />
             Add Stat
           </Button>

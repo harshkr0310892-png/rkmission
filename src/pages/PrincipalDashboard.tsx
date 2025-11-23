@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense, useMemo } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -25,7 +25,6 @@ import {
   MessageSquare,
   Star,
   Send,
-  Volume2,
   Mail,
   Copy,
   Image as ImageIcon,
@@ -40,6 +39,8 @@ import { getSupabaseData, setSupabaseData, subscribeToSupabaseChanges } from "@/
 import { supabase } from "@/lib/supabaseClient";
 import RouteLoader from "@/components/RouteLoader";
 import { toast } from "sonner";
+import { useDeviceCapability } from "@/hooks/use-device-capability";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const TeacherManager = lazy(() => import("@/components/TeacherManager"));
 const HomepageEditor = lazy(() => import("@/components/HomepageEditor"));
@@ -55,7 +56,6 @@ const EventsManager = lazy(() => import("@/components/EventsManager"));
 const CategoryManager = lazy(() => import("@/components/CategoryManager"));
 const AcademicsManager = lazy(() => import("@/components/AcademicsManager"));
 const FacilitiesManager = lazy(() => import("@/components/FacilitiesManager"));
-const AudioMessageManager = lazy(() => import("@/components/AudioMessageManager"));
 const YearlyBookManager = lazy(() => import("@/components/YearlyBookManager"));
 const ExamRoutineManager = lazy(() => import("@/components/ExamRoutineManager"));
 const TopScorersLearnMoreManager = lazy(() => import("@/components/TopScorersLearnMoreManager"));
@@ -206,9 +206,10 @@ interface TeacherRecord {
 }
 
 const PrincipalDashboard = () => {
+  const deviceCapability = useDeviceCapability();
   const [principalEmail, setPrincipalEmail] = useState("");
   // Restore active section from sessionStorage on mount
-  const [activeSection, setActiveSection] = useState<"dashboard" | "teachers" | "homepage" | "courses" | "gallery" | "about" | "announcements" | "admissions" | "topscorers" | "createteacherid" | "manageteachers" | "manageteacherid" | "pricemanagement" | "timetable" | "admissionsmanager" | "branding" | "events" | "categories" | "academicsmanager" | "facilitiesmanager" | "audiomessages" | "booksmanager" | "examroutine" | "contactforms" | "topscorerslearnmore">(() => {
+  const [activeSection, setActiveSection] = useState<"dashboard" | "teachers" | "homepage" | "courses" | "gallery" | "about" | "announcements" | "admissions" | "topscorers" | "createteacherid" | "manageteachers" | "manageteacherid" | "pricemanagement" | "timetable" | "admissionsmanager" | "branding" | "events" | "categories" | "academicsmanager" | "facilitiesmanager" | "booksmanager" | "examroutine" | "contactforms" | "topscorerslearnmore">(() => {
     const saved = sessionStorage.getItem('principalActiveSection');
     return (saved as any) || "dashboard";
   });
@@ -230,6 +231,10 @@ const PrincipalDashboard = () => {
   const [admissionsSearch, setAdmissionsSearch] = useState("");
   const [contentManagementSearch, setContentManagementSearch] = useState("");
   const [quickActionsSearch, setQuickActionsSearch] = useState("");
+  // Debounce search inputs for better performance
+  const debouncedAdmissionsSearch = useDebounce(admissionsSearch, 300);
+  const debouncedContentManagementSearch = useDebounce(contentManagementSearch, 300);
+  const debouncedQuickActionsSearch = useDebounce(quickActionsSearch, 300);
   const [admissionStatus, setAdmissionStatus] = useState(true); // true = ON, false = OFF
   const [contactForms, setContactForms] = useState<any[]>([]);
   const [contactFormsSearch, setContactFormsSearch] = useState("");
@@ -1315,12 +1320,13 @@ Teacher ID: ${teacherId}`);
     });
   }, [students, principalRemarkFilters]);
 
-  const stats = [
+  // Memoize stats to prevent unnecessary recalculations
+  const stats = useMemo(() => [
     { icon: Users, label: "Total Students", value: "1,247", change: "+12 this month" },
     { icon: BookOpen, label: "Active Courses", value: "45", change: "+3 new courses" },
     { icon: Calendar, label: "Upcoming Events", value: "8", change: "Next: Science Fair" },
     { icon: BarChart3, label: "Average Grade", value: "87.5%", change: "+2.3% improvement" }
-  ];
+  ], []);
 
   const selectedStudentAttendance = selectedLookupStudent ? getAttendanceSummaryForStudent(selectedLookupStudent) : null;
   const selectedTeacherRemarks = selectedLookupStudent ? getTeacherRemarksForStudent(selectedLookupStudent) : [];
@@ -1328,37 +1334,55 @@ Teacher ID: ${teacherId}`);
   const selectedStudentReports = selectedLookupStudent ? getStudentReportsForStudent(selectedLookupStudent) : [];
   const selectedStudentFees = selectedLookupStudent ? getStudentFeeSummary(selectedLookupStudent) : { fees: [], pending: [], dueAmount: 0 };
 
-  const quickActions = [
-    { icon: Bell, label: "Send Announcement", color: "from-blue-600 to-purple-600", action: () => setActiveSection("announcements") },
-    { icon: Volume2, label: "Audio Messages", color: "from-sky-400 to-purple-600", action: () => setActiveSection("audiomessages") },
-    { icon: MessageSquare, label: "Notify Students", color: "from-blue-600 to-purple-600", action: () => setShowStudentNotificationModal(true) },
-    { icon: Star, label: "Principal Remarks", color: "from-sky-400 to-purple-600", action: () => setShowPrincipalRemarksModal(true) },
-    { icon: Search, label: "Student Lookup", color: "from-blue-600 to-purple-600", action: () => setShowStudentLookupModal(true) },
-    { icon: Mail, label: "See Contact Form", color: "from-sky-400 to-purple-600", action: () => setActiveSection("contactforms") },
-    { icon: BookOpen, label: "Yearly Books", color: "from-blue-600 to-purple-600", action: () => setActiveSection("booksmanager") },
-    { icon: Calendar, label: "Exam Routine", color: "from-sky-400 to-purple-600", action: () => setActiveSection("examroutine") },
-    { icon: Settings, label: "Branding & Logo", color: "from-blue-600 to-purple-600", action: () => setActiveSection("branding") },
-    { icon: Clock, label: "Manage Timetable", color: "from-sky-400 to-purple-600", action: () => setActiveSection("timetable") },
-    { icon: GraduationCap, label: "Edit Admissions Page", color: "from-blue-600 to-purple-600", action: () => setActiveSection("admissionsmanager") },
-    { icon: Trophy, label: "Top Scorers Content", color: "from-sky-400 to-purple-600", action: () => setActiveSection("topscorerslearnmore") },
+  // Memoize quick actions with useCallback for handlers
+  const handleSetActiveSection = useCallback((section: typeof activeSection) => {
+    setActiveSection(section);
+  }, []);
+
+  const handleShowStudentNotificationModal = useCallback(() => {
+    setShowStudentNotificationModal(true);
+  }, []);
+
+  const handleShowPrincipalRemarksModal = useCallback(() => {
+    setShowPrincipalRemarksModal(true);
+  }, []);
+
+  const handleShowStudentLookupModal = useCallback(() => {
+    setShowStudentLookupModal(true);
+  }, []);
+
+  const quickActions = useMemo(() => [
+    { icon: Bell, label: "Send Announcement", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("announcements") },
+    { icon: MessageSquare, label: "Notify Students", color: "from-blue-600 to-purple-600", action: handleShowStudentNotificationModal },
+    { icon: Star, label: "Principal Remarks", color: "from-sky-400 to-purple-600", action: handleShowPrincipalRemarksModal },
+    { icon: Search, label: "Student Lookup", color: "from-blue-600 to-purple-600", action: handleShowStudentLookupModal },
+    { icon: Mail, label: "See Contact Form", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("contactforms") },
+    { icon: BookOpen, label: "Yearly Books", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("booksmanager") },
+    { icon: Calendar, label: "Exam Routine", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("examroutine") },
+    { icon: Settings, label: "Branding & Logo", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("branding") },
+    { icon: Clock, label: "Manage Timetable", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("timetable") },
+    { icon: GraduationCap, label: "Edit Admissions Page", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("admissionsmanager") },
+    { icon: Trophy, label: "Top Scorers Content", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("topscorerslearnmore") },
     // New quick actions for Bus Tracking IDs
     { icon: IdCard, label: "Create Bus ID", color: "from-blue-600 to-purple-600", action: () => navigate('/create-bus-id') },
     { icon: IdCard, label: "Manage Bus IDs", color: "from-sky-400 to-purple-600", action: () => navigate('/manage-bus-id') }
-  ];
+  ], [handleSetActiveSection, handleShowStudentNotificationModal, handleShowPrincipalRemarksModal, handleShowStudentLookupModal, navigate]);
 
-  // Precompute filtered teachers list for Manage Teachers
-  const filteredTeachers = teachers
-    .filter(t => (teacherSubjectFilter ? (t.subject || '').toLowerCase() === teacherSubjectFilter.toLowerCase() : true))
-    .filter(t => (teacherStatusFilter ? t.status === (teacherStatusFilter as 'active' | 'banned') : true))
-    .filter(t => {
-      const q = teacherSearch.trim().toLowerCase();
-      if (!q) return true;
-      return (
-        (t.name || '').toLowerCase().includes(q) ||
-        (t.email || '').toLowerCase().includes(q) ||
-        (t.subject || '').toLowerCase().includes(q)
-      );
-    });
+  // Precompute filtered teachers list for Manage Teachers (memoized for performance)
+  const filteredTeachers = useMemo(() => {
+    return teachers
+      .filter(t => (teacherSubjectFilter ? (t.subject || '').toLowerCase() === teacherSubjectFilter.toLowerCase() : true))
+      .filter(t => (teacherStatusFilter ? t.status === (teacherStatusFilter as 'active' | 'banned') : true))
+      .filter(t => {
+        const q = teacherSearch.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          (t.name || '').toLowerCase().includes(q) ||
+          (t.email || '').toLowerCase().includes(q) ||
+          (t.subject || '').toLowerCase().includes(q)
+        );
+      });
+  }, [teachers, teacherSubjectFilter, teacherStatusFilter, teacherSearch]);
 
   useEffect(() => {
     if (!principalRemarksForm.studentId) return;
@@ -1738,18 +1762,18 @@ Teacher ID: ${teacherId}`);
             <>
               {/* Stats Grid */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1 } : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 }}
                 className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8"
               >
                 {stats.map((stat, index) => (
                   <motion.div
                     key={stat.label}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1 } : { opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + index * 0.1 }}
-                    className="bg-card/95 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200 will-change-transform"
+                    transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 + index * 0.1 }}
+                    className="bg-card/95 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200"
                   >
                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-royal/20 to-gold/20 flex items-center justify-center">
@@ -1792,29 +1816,24 @@ Teacher ID: ${teacherId}`);
                     <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:grid-cols-3 lg:gap-3">
                       {quickActions
                         .filter(action => 
-                          action.label.toLowerCase().includes(quickActionsSearch.toLowerCase())
+                          action.label.toLowerCase().includes(debouncedQuickActionsSearch.toLowerCase())
                         )
                         .map((action, index) => (
                       <motion.button
                         key={action.label}
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.4 + index * 0.1 }}
+                        whileHover={deviceCapability.isLowEnd ? {} : { scale: 1.02 }}
+                        whileTap={deviceCapability.isLowEnd ? {} : { scale: 0.98 }}
                         onClick={action.action}
-                        className="relative p-2 sm:p-3 lg:p-4 rounded-2xl transition-all duration-200 text-white group touch-manipulation overflow-hidden will-change-transform"
+                        className="relative p-2 sm:p-3 lg:p-4 rounded-2xl transition-all duration-200 text-white group touch-manipulation overflow-hidden"
                       >
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 via-transparent to-transparent opacity-0 group-hover:opacity-80 blur-xl transition duration-300 pointer-events-none" />
                         <div className={`relative bg-gradient-to-r ${action.color} p-3 sm:p-4 lg:p-5 rounded-2xl shadow-[0_8px_32px_rgba(88,28,135,0.3)] hover:shadow-[0_12px_48px_rgba(88,28,135,0.5)] border border-white/20 group-hover:border-white/40 transition-all duration-300`}>
                             <action.icon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white mb-2 sm:mb-2 lg:mb-3 mx-auto" />
                             <p className="text-[11px] sm:text-sm lg:text-base font-semibold text-white text-center leading-tight px-1">
-                              {action.label === "Audio Messages" ? (
-                                <>
-                                  <span className="sm:hidden">Audio</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Principal Remarks" ? (
+                              {action.label === "Principal Remarks" ? (
                                 <>
                                   <span className="sm:hidden">Remarks</span>
                                   <span className="hidden sm:inline">{action.label}</span>
@@ -1905,15 +1924,15 @@ Teacher ID: ${teacherId}`);
                       { title: "Manage Teacher IDs", desc: "View and manage teacher login credentials", icon: IdCard, action: () => setActiveSection("manageteacherid") },
                       { title: "Price Management", desc: "Update admission fees and pricing", icon: DollarSign, action: () => setActiveSection("pricemanagement") }
                     ].filter(item => {
-                      if (!contentManagementSearch.trim()) return true;
-                      const searchLower = contentManagementSearch.toLowerCase();
+                      if (!debouncedContentManagementSearch.trim()) return true;
+                      const searchLower = debouncedContentManagementSearch.toLowerCase();
                       const titleLower = item.title.toLowerCase();
                       const descLower = item.desc.toLowerCase();
                       return titleLower.includes(searchLower) || descLower.includes(searchLower);
                     }).map((item, index) => (
                       <motion.div
                         key={item.title}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 + index * 0.1 }}
                         onClick={item.action}
@@ -4021,34 +4040,6 @@ Teacher ID: ${teacherId}`);
             </motion.div>
           )}
 
-          {activeSection === "audiomessages" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-6 sm:mt-8"
-            >
-              <div className="bg-card/95 backdrop-blur-md rounded-lg sm:rounded-xl p-4 sm:p-6 border border-border/50">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-                  <h2 className="text-base sm:text-lg font-heading font-bold text-foreground">
-                    Audio Messages Management
-                  </h2>
-                  <Button
-                    variant="outline"
-                    onClick={() => setActiveSection("dashboard")}
-                    size="sm"
-                    className="w-full sm:w-auto"
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Back to Dashboard
-                  </Button>
-                </div>
-                <Suspense fallback={<RouteLoader />}>
-                  <AudioMessageManager principalEmail={principalEmail} />
-                </Suspense>
-              </div>
-            </motion.div>
-          )}
 
           {/* Contact Forms Section */}
           {activeSection === "contactforms" && (

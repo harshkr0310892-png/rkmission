@@ -468,7 +468,7 @@ const AdmissionsPageManager: React.FC = () => {
         <Button 
           onClick={saveData} 
           disabled={saveStatus === 'saving'}
-          className="bg-gradient-to-r from-gold to-yellow-500 hover:from-yellow-500 hover:to-gold text-black font-semibold shadow-lg shadow-gold/20 border-2 border-yellow-400/50 w-full sm:w-auto"
+          className="bg-gradient-to-r from-gold to-yellow-500 hover:from-yellow-500 hover:to-gold text-white font-semibold shadow-lg shadow-gold/20 border-2 border-yellow-400/50 w-full sm:w-auto"
         >
           {saveStatus === 'saving' ? (
             <>

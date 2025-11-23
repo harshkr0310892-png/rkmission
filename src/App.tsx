@@ -9,7 +9,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import RouteLoader from "@/components/RouteLoader";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import ProtectedRoute from "./components/ProtectedRoute";
-import PrincipalAudioRoute from "@/components/PrincipalAudioRoute";
 
 const Index = lazy(() => import("./pages/Index"));
 const About = lazy(() => import("./pages/About"));
@@ -645,12 +644,6 @@ function AnimatedRoutes() {
               <CoursesManagement />
             </motion.div>
           } />
-          <Route
-            path="/principal-audio"
-            element={
-              <PrincipalAudioRoute />
-            }
-          />
           <Route path="/lazy-example" element={
             <motion.div
               initial={{ opacity: 0 }}

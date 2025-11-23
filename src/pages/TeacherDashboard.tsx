@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDeviceCapability } from "@/hooks/use-device-capability";
+import { useDebounce } from "@/hooks/use-debounce";
 import { 
   Users, 
   BookOpen, 
@@ -36,7 +38,6 @@ import {
   Upload,
   Lock,
   Image,
-  Volume2, // Import Volume2 icon for Principal Audio
   Video, // Import Video icon for Live Teaching
   Save
 } from "lucide-react";
@@ -189,6 +190,7 @@ interface PrincipalRemark {
 }
 
 const TeacherDashboard = () => {
+  const deviceCapability = useDeviceCapability();
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherSubject, setTeacherSubject] = useState("");
@@ -322,8 +324,11 @@ const TeacherDashboard = () => {
   const [showTeacherNotifications, setShowTeacherNotifications] = useState(false);
   const [teacherNotifications, setTeacherNotifications] = useState<Notification[]>([]);
   const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
-  // Unread count for header bell
-  const unreadTeacherNotifications = teacherNotifications.filter(n => n.status === 'unread').length;
+  // Memoize unread count for header bell for performance
+  const unreadTeacherNotifications = useMemo(() => 
+    teacherNotifications.filter(n => n.status === 'unread').length, 
+    [teacherNotifications]
+  );
   const [showEditNotificationModal, setShowEditNotificationModal] = useState(false);
   const [editNotificationForm, setEditNotificationForm] = useState({
     subject: '',
@@ -1069,7 +1074,7 @@ Student ID: ${studentId}`);
     return students.filter(s => {
       const byClass = paymentFilterClass ? s.class === paymentFilterClass : true;
       const bySection = paymentFilterSection ? s.section === paymentFilterSection : true;
-      const byRoll = paymentFilterRoll ? s.rollNumber.toString() === paymentFilterRoll : true;
+      const byRoll = debouncedPaymentFilterRoll ? s.rollNumber.toString() === debouncedPaymentFilterRoll : true;
       return byClass && bySection && byRoll;
     });
   };
@@ -1821,7 +1826,7 @@ Student ID: ${studentId}`);
             {/* Quick Stats - Mobile Optimized */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-card/95 sm:backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
@@ -1837,9 +1842,9 @@ Student ID: ${studentId}`);
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 }}
                 className="bg-card/95 sm:backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 space-y-1.5 lg:space-y-0">
@@ -1871,9 +1876,9 @@ Student ID: ${studentId}`);
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.3 }}
                 className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 space-y-1.5 lg:space-y-0">
@@ -1905,16 +1910,12 @@ Student ID: ${studentId}`);
                   { title: "View Students", desc: "Manage student records", icon: Users, action: () => setActiveSection("students") },
                   { title: "Add Remarks", desc: "Give good/bad remarks", icon: MessageSquare, action: () => setActiveSection("remarks") },
                   { title: "Fee Management", desc: "Manage student fees", icon: CreditCard, action: () => setActiveSection("fees") },
-                  { title: "Principal Audio", desc: "Listen to Principal messages", icon: Volume2, action: () => {
-                    console.log('[TeacherDashboard] Navigating to principal audio with teacher info:', { teacherEmail, teacherName });
-                    navigate('/principal-audio');
-                  } }
                 ].map((item, index) => (
                   <motion.div
                     key={item.title}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.05 }}
+                    transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.5 + index * 0.05 }}
                     onClick={item.action}
                     className="p-3 sm:p-4 lg:p-4 rounded-lg bg-card/80 border border-border/30 hover:bg-card/95 transition-shadow duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md"
                   >

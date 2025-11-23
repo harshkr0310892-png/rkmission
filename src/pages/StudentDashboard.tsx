@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useDeviceCapability } from "@/hooks/use-device-capability";
 import { subscribeToSupabaseChanges, setSupabaseData } from "@/lib/supabaseHelpers";
 import { useTranslation } from "@/hooks/useTranslation";
 import { 
@@ -25,7 +26,6 @@ import {
   CheckCircle,
   AlertCircle,
   Calendar as CalendarIcon,
-  Volume2,
   Video,
   Edit,
   MapPin,
@@ -94,6 +94,7 @@ interface PaymentRequest {
 }
 
 const StudentDashboard = () => {
+  const deviceCapability = useDeviceCapability();
   const { t } = useTranslation();
   const [studentData, setStudentData] = useState<StudentData | null>(null);
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -381,7 +382,8 @@ const StudentDashboard = () => {
     setPaymentRequests(studentPaymentRequests);
   };
 
-  const getMyFeeStatus = () => {
+  // Memoize fee status calculations for performance
+  const feeStatus = useMemo(() => {
     const pendingFees = feeRecords.filter(fee => fee.status === 'pending');
     const paidFees = feeRecords.filter(fee => fee.status === 'paid');
     const totalPending = pendingFees.reduce((sum, fee) => sum + fee.amount, 0);
@@ -395,7 +397,17 @@ const StudentDashboard = () => {
       pendingMonths: pendingFees.map(fee => fee.month),
       paidMonths: paidFees.map(fee => fee.month)
     };
-  };
+  }, [feeRecords]);
+
+  // Memoize remarks counts for performance (must be at top level, not in JSX)
+  const goodRemarksCount = useMemo(() => 
+    studentRemarks.filter(r => r.type === 'good').length, 
+    [studentRemarks]
+  );
+  const badRemarksCount = useMemo(() => 
+    studentRemarks.filter(r => r.type === 'bad').length, 
+    [studentRemarks]
+  );
 
   const handlePayFees = (paymentRequest: PaymentRequest) => {
     setSelectedPaymentRequest(paymentRequest);
@@ -835,7 +847,7 @@ const StudentDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
       <motion.header
-        initial={{ opacity: 0, y: -20 }}
+        initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative bg-gradient-to-r from-slate-950 via-blue-950 to-slate-950 backdrop-blur-none sm:backdrop-blur-xl border-b border-gradient-to-r from-gold/30 via-blue-400/30 to-gold/30 sticky top-0 z-50 shadow-md sm:shadow-2xl shadow-black/50 overflow-hidden"
       >
@@ -942,17 +954,17 @@ const StudentDashboard = () => {
       <div className="container-wide py-4 sm:py-8 px-3 sm:px-6">
         {/* Stats Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8"
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + index * 0.1 }}
+              transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 + index * 0.1 }}
               className="bg-card/95 sm:backdrop-blur-md rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200"
             >
               <div className="flex items-center justify-between mb-2 sm:mb-4">
@@ -972,9 +984,9 @@ const StudentDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
           {/* Upcoming Events */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.3 }}
           >
             <div className="bg-card/95 sm:backdrop-blur-md rounded-xl p-4 sm:p-6 border border-border/50">
               <h2 className="text-lg font-heading font-bold text-foreground mb-6">
@@ -1085,9 +1097,11 @@ const StudentDashboard = () => {
               {t("quickActions")}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
-              {[
+              {useMemo(() => {
+                const unreadNotificationsCount = studentNotifications.filter(n => n.status === 'unread').length;
+                return [
                 { title: t("aiAssistant"), icon: Bot, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => navigate('/student-ai-assistant') },
-                { title: t("notificationsPanelTitle"), icon: Bell, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => navigate('/student-notifications'), badge: studentNotifications.filter(n => n.status === 'unread').length },
+                { title: t("notificationsPanelTitle"), icon: Bell, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => navigate('/student-notifications'), badge: unreadNotificationsCount },
                 { title: t("viewGrades"), icon: BarChart3, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => setShowGradesModal(true) },
                 { title: "Assignments", icon: FileText, borderColor: "from-yellow-400 to-gold", textColor: "text-yellow-400", action: () => {
                   loadAssignments(); // Refresh assignments when opening
@@ -1105,16 +1119,16 @@ const StudentDashboard = () => {
                 { title: "AI Quiz", icon: GraduationCap, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => navigate('/student-quiz') },
                 { title: "Track Bus", icon: MapPin, borderColor: "from-gold to-yellow-400", textColor: "text-yellow-400", action: () => navigate('/student-track-bus') },
                 { title: "Fees", icon: CreditCard, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => setActiveSection("fees") },
-                { title: "Principal Audio", icon: Volume2, borderColor: "from-yellow-400 to-gold", textColor: "text-yellow-400", action: () => navigate('/principal-audio') },
                 { title: "Principal Remarks", icon: Star, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => setShowPrincipalRemarksModal(true) }
-              ].map((action, index) => (
+              ];
+              }, [t, navigate, studentNotifications]).map((action, index) => (
                 <motion.button
                   key={action.title}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 + index * 0.05 }}
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.92 }}
+                  transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.7 + index * 0.05 }}
+                  whileHover={deviceCapability.isLowEnd ? {} : { scale: 1.08 }}
+                  whileTap={deviceCapability.isLowEnd ? {} : { scale: 0.92 }}
                   onClick={action.action}
                   className="square-glass-btn flex flex-col items-center justify-center gap-2 relative group"
                   style={{ padding: '16px 20px' }}
@@ -1641,13 +1655,13 @@ const StudentDashboard = () => {
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="bg-green-500/10 rounded-lg p-3 sm:p-4 text-center border border-green-500/30">
                     <div className="text-xl sm:text-2xl font-bold text-green-400">
-                      {studentRemarks.filter(r => r.type === 'good').length}
+                      {goodRemarksCount}
                     </div>
                     <div className="text-xs sm:text-sm text-green-400">Good Remarks</div>
                   </div>
                   <div className="bg-red-500/10 rounded-lg p-3 sm:p-4 text-center border border-red-500/30">
                     <div className="text-xl sm:text-2xl font-bold text-red-400">
-                      {studentRemarks.filter(r => r.type === 'bad').length}
+                      {badRemarksCount}
                     </div>
                     <div className="text-xs sm:text-sm text-red-400">Areas to Improve</div>
                   </div>
@@ -1908,7 +1922,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-base sm:text-lg font-bold text-foreground">
-                      ₹{getMyFeeStatus().totalPaid}
+                      ₹{feeStatus.totalPaid}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">Total Paid</p>
                   </div>
@@ -1922,7 +1936,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-base sm:text-lg font-bold text-foreground">
-                      ₹{getMyFeeStatus().totalPending}
+                      ₹{feeStatus.totalPending}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">Total Pending</p>
                   </div>
@@ -1936,7 +1950,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-base sm:text-lg font-bold text-foreground">
-                      {getMyFeeStatus().pendingFees.length}
+                      {feeStatus.pendingFees.length}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">Pending Months</p>
                   </div>
