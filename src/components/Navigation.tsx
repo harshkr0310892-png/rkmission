@@ -218,9 +218,9 @@ const Navigation = () => {
         // Keep header visually consistent when mobile menu is open by forcing
         // a solid, slightly opaque background. Otherwise fall back to the
         // scrolled/transparent behaviour.
-        background: isOpen ? 'rgba(6, 18, 40, 0.95)' : (scrolled ? 'rgba(15, 50, 90, 0.7)' : 'transparent'),
+         background: isOpen ? 'rgba(211, 215, 223, 0.47)' : 'transparent',
         backdropFilter: isMobile ? 'blur(6px)' : 'blur(20px)',
-        border: '1px solid rgba(0, 0, 0, 0.25)',
+        border: '1px solid rgba(231, 213, 213, 0.53)',
         borderRadius: '9999px',
         boxShadow: isMobile ? '0 4px 12px rgba(19, 20, 20, 0.25)' : '0 12px 30px rgba(19, 20, 20, 0.35)',
         maxWidth: '1200px',
