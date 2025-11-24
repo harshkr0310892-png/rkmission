@@ -166,6 +166,7 @@ const Navigation = () => {
   };
 
   const unreadCount = notifications.filter(n => n.unread).length;
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
 
   // Toggle menu and add/remove a body class so we can hide page-level
   // decorative elements while the mobile menu is open (prevents oval shapes
@@ -210,7 +211,7 @@ const Navigation = () => {
 
   return (
     <motion.nav
-      className={`fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 transition-all duration-300`}
+      className={`fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 transition-all ${isMobile ? 'duration-0' : 'duration-300'}`}
       animate={{ y: 0 }}
       transition={{ duration: 0, ease: "easeOut" }}
       style={{
@@ -218,10 +219,10 @@ const Navigation = () => {
         // a solid, slightly opaque background. Otherwise fall back to the
         // scrolled/transparent behaviour.
         background: isOpen ? 'rgba(6, 18, 40, 0.95)' : (scrolled ? 'rgba(15, 50, 90, 0.7)' : 'transparent'),
-        backdropFilter: 'blur(20px)',
+        backdropFilter: isMobile ? 'blur(6px)' : 'blur(20px)',
         border: '1px solid rgba(0, 0, 0, 0.25)',
         borderRadius: '9999px',
-        boxShadow: '0 12px 30px rgba(19, 20, 20, 0.35)',
+        boxShadow: isMobile ? '0 4px 12px rgba(19, 20, 20, 0.25)' : '0 12px 30px rgba(19, 20, 20, 0.35)',
         maxWidth: '1200px',
         margin: '0 auto'
       }}
@@ -597,10 +598,7 @@ const Navigation = () => {
             </div>
 
             {/* Mobile Menu Button */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -609,8 +607,8 @@ const Navigation = () => {
                 aria-label="Toggle menu"
               >
                 <motion.div
-                  animate={{ rotate: isOpen ? 90 : 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  animate={{ rotate: isOpen ? 0 : 0 }}
+                  transition={{ duration: 0 }}
                 >
                   {isOpen ? <X className="h-5 w-5 text-red-400" /> : <Menu className="h-5 w-5 text-blue-400" />}
                 </motion.div>
@@ -623,18 +621,18 @@ const Navigation = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, scaleY: 0 }}
-              animate={{ opacity: 1, scaleY: 1 }}
-              exit={{ opacity: 0, scaleY: 0 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              style={{ transformOrigin: "top", willChange: "transform, opacity" }}
+              initial={{ height: 0 }}
+              animate={{ height: 'auto' }}
+              exit={{ height: 0 }}
+              transition={{ duration: 0 }}
+              style={{ overflow: 'hidden', transformOrigin: 'top' }}
               className="sm:hidden border-t border-blue-400/30 bg-gradient-to-b from-blue-950/80 to-blue-900/60 backdrop-blur-md"
             >
               <div className="p-4 space-y-1 max-h-[70vh] overflow-y-auto">
                 {navItems.map((item) => (
                   <motion.div
                     key={item.path}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 1, x: 0 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0 }}
                   >
