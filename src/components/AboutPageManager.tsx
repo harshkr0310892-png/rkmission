@@ -125,7 +125,7 @@ const AboutPageManager = () => {
         position: "Principal",
         description: "Dr. Sarah Johnson brings over 20 years of educational leadership experience to Royal Academy. She holds a Ph.D. in Educational Administration and is passionate about creating innovative learning environments that inspire both students and teachers.",
         photos: [
-          "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80"
+          "/placeholder-image.svg"
         ],
         email: "principal@royalacademy.edu",
         phone: "+1 (555) 123-4567",

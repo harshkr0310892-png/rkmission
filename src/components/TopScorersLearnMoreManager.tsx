@@ -109,7 +109,7 @@ const TopScorersLearnMoreManager = () => {
   ]);
 
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([
-    { name: "Emma Richardson", role: "Valedictorian 2024", quote: "Royal Academy provided me with the perfect environment to excel. The teachers pushed me to reach my potential while supporting every step of my journey.", image: "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80", achievement: "Harvard University - Full Scholarship" },
+    { name: "Emma Richardson", role: "Valedictorian 2024", quote: "Royal Academy provided me with the perfect environment to excel. The teachers pushed me to reach my potential while supporting every step of my journey.", image: "/placeholder-image.svg", achievement: "Harvard University - Full Scholarship" },
     { name: "James Chen", role: "Math Olympiad Gold Medalist", quote: "The advanced mathematics program here is exceptional. I was able to compete at international levels thanks to the rigorous training and support.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80", achievement: "MIT - Early Admission" },
     { name: "Dr. Sarah Williams", role: "Parent & Alumni", quote: "As both a parent and alumna, I've seen firsthand how Royal Academy transforms students into confident, capable leaders ready for any challenge.", image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face&auto=format&q=80", achievement: "Parent of 2024 Top Scorer" }
   ]);

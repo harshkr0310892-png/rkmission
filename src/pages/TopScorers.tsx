@@ -102,7 +102,7 @@ const TopScorers = () => {
       year: "2024",
       rank: 1,
       achievements: ["Valedictorian", "Science Olympiad Gold", "Math Competition Winner"],
-      image: "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80",
+      image: "/placeholder-image.svg",
       description: "Outstanding performance across all subjects with exceptional leadership qualities."
     },
     {

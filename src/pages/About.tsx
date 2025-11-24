@@ -119,7 +119,7 @@ const About = () => {
         name: "Dr. Sarah Johnson",
         position: "Principal",
         description: "Dr. Sarah Johnson brings over 20 years of educational leadership experience to Royal Academy.",
-        photos: ["https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80"],
+      photos: ["/placeholder-image.svg"],
         email: "principal@royalacademy.edu",
         phone: "+1 (555) 123-4567",
         qualifications: "Ph.D. in Educational Administration",
@@ -265,7 +265,7 @@ const About = () => {
               <div className="space-y-3 sm:space-y-4">
                 <h3 className="text-xl sm:text-2xl font-heading font-semibold text-gradient-royal">{aboutData.missionTitle}</h3>
                 <div className="text-base sm:text-lg text-muted-foreground italic bg-card/50 p-5 sm:p-6 rounded-lg border border-border">
-                  "<ShinyText text={aboutData.missionContent} speed={4} />"
+                  <ShinyText text={aboutData.missionContent} speed={4} />
                 </div>
               </div>
             </motion.div>

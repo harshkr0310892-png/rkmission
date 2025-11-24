@@ -30,14 +30,15 @@ const AcademicBanner: React.FC<AcademicBannerProps> = ({
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener('resize', resize);
 
     // Flowing threads animation like React Bits
     let time = 0;
-    const lineCount = isMobile ? 15 : 30;
+    const getPerfMode = () => document.documentElement.classList.contains('performance-mode');
+    const baseLineCount = isMobile || getPerfMode() ? 10 : 30;
 
     const animate = () => {
       time += 0.005; // Slower animation
@@ -46,19 +47,21 @@ const AcademicBanner: React.FC<AcademicBannerProps> = ({
 
       ctx.clearRect(0, 0, width, height);
 
+      const perf = getPerfMode();
+      const lineCount = perf || isMobile ? baseLineCount : baseLineCount;
       for (let i = 0; i < lineCount; i++) {
         const perc = i / lineCount;
-        const opacity = (1 - perc) * 0.4;
+        const opacity = (1 - perc) * (perf ? 0.3 : 0.4);
         
         ctx.strokeStyle = `rgba(${Math.floor(color[0] * 255)}, ${Math.floor(color[1] * 255)}, ${Math.floor(color[2] * 255)}, ${opacity})`;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = perf ? 1.5 : 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         
         ctx.beginPath();
         
         const points: [number, number][] = [];
-        const step = isMobile ? 10 : 5;
+        const step = (perf || isMobile) ? 12 : 5;
         
         for (let x = 0; x <= width; x += step) {
           const xNorm = x / width;

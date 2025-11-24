@@ -7,7 +7,6 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getSupabaseData, subscribeToSupabaseChanges } from '@/lib/supabaseHelpers';
 import { Bus, MapPin, Navigation, Crosshair, ArrowLeft, Star, AlertCircle, Check } from 'lucide-react';
@@ -634,13 +633,10 @@ const StudentTrackBus: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="mb-4">
               <CardContent className="p-0">
-                <div style={{ height: (useIsMobile() ? '380px' : '500px'), width: '100%' }}>
+                <div style={{ height: '500px', width: '100%' }}>
                   <MapContainer
                     center={[busLoc.lat, busLoc.lng]}
                     zoom={15}
-                    preferCanvas={true}
-                    zoomControl={false}
-                    attributionControl={false}
                     style={{ height: '100%', width: '100%', borderRadius: '8px' }}
                   >
                     <TileLayer
@@ -670,7 +666,8 @@ const StudentTrackBus: React.FC = () => {
                       </Marker>
                     )}
 
-                    {myLatLng && !useIsMobile() && (
+                    {/* Routing */}
+                    {myLatLng && (
                       <RoutingControl busLocation={busLoc} homeLocation={myLatLng} />
                     )}
 

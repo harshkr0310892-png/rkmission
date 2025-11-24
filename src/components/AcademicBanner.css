@@ -88,9 +88,9 @@
   }
 }
 
-/* Performance mode - disable animations */
+/* Performance mode - keep canvas but tone it down */
 .performance-mode .academic-banner-canvas {
-  display: none;
+  opacity: 0.6;
 }
 
 .performance-mode .academic-banner-wrapper {

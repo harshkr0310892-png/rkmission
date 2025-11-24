@@ -224,7 +224,7 @@ body {
 
   .btn-gold {
     background: var(--gradient-gold);
-    color: #1a1a1a;
+    color: hsl(var(--foreground));
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(253, 185, 49, 0.4);
     transition: all 0.3s ease;

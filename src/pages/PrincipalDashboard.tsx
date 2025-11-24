@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -39,8 +39,6 @@ import { getSupabaseData, setSupabaseData, subscribeToSupabaseChanges } from "@/
 import { supabase } from "@/lib/supabaseClient";
 import RouteLoader from "@/components/RouteLoader";
 import { toast } from "sonner";
-import { useDeviceCapability } from "@/hooks/use-device-capability";
-import { useDebounce } from "@/hooks/use-debounce";
 
 const TeacherManager = lazy(() => import("@/components/TeacherManager"));
 const HomepageEditor = lazy(() => import("@/components/HomepageEditor"));
@@ -206,7 +204,6 @@ interface TeacherRecord {
 }
 
 const PrincipalDashboard = () => {
-  const deviceCapability = useDeviceCapability();
   const [principalEmail, setPrincipalEmail] = useState("");
   // Restore active section from sessionStorage on mount
   const [activeSection, setActiveSection] = useState<"dashboard" | "teachers" | "homepage" | "courses" | "gallery" | "about" | "announcements" | "admissions" | "topscorers" | "createteacherid" | "manageteachers" | "manageteacherid" | "pricemanagement" | "timetable" | "admissionsmanager" | "branding" | "events" | "categories" | "academicsmanager" | "facilitiesmanager" | "booksmanager" | "examroutine" | "contactforms" | "topscorerslearnmore">(() => {
@@ -231,10 +228,6 @@ const PrincipalDashboard = () => {
   const [admissionsSearch, setAdmissionsSearch] = useState("");
   const [contentManagementSearch, setContentManagementSearch] = useState("");
   const [quickActionsSearch, setQuickActionsSearch] = useState("");
-  // Debounce search inputs for better performance
-  const debouncedAdmissionsSearch = useDebounce(admissionsSearch, 300);
-  const debouncedContentManagementSearch = useDebounce(contentManagementSearch, 300);
-  const debouncedQuickActionsSearch = useDebounce(quickActionsSearch, 300);
   const [admissionStatus, setAdmissionStatus] = useState(true); // true = ON, false = OFF
   const [contactForms, setContactForms] = useState<any[]>([]);
   const [contactFormsSearch, setContactFormsSearch] = useState("");
@@ -1320,13 +1313,12 @@ Teacher ID: ${teacherId}`);
     });
   }, [students, principalRemarkFilters]);
 
-  // Memoize stats to prevent unnecessary recalculations
-  const stats = useMemo(() => [
+  const stats = [
     { icon: Users, label: "Total Students", value: "1,247", change: "+12 this month" },
     { icon: BookOpen, label: "Active Courses", value: "45", change: "+3 new courses" },
     { icon: Calendar, label: "Upcoming Events", value: "8", change: "Next: Science Fair" },
     { icon: BarChart3, label: "Average Grade", value: "87.5%", change: "+2.3% improvement" }
-  ], []);
+  ];
 
   const selectedStudentAttendance = selectedLookupStudent ? getAttendanceSummaryForStudent(selectedLookupStudent) : null;
   const selectedTeacherRemarks = selectedLookupStudent ? getTeacherRemarksForStudent(selectedLookupStudent) : [];
@@ -1334,55 +1326,36 @@ Teacher ID: ${teacherId}`);
   const selectedStudentReports = selectedLookupStudent ? getStudentReportsForStudent(selectedLookupStudent) : [];
   const selectedStudentFees = selectedLookupStudent ? getStudentFeeSummary(selectedLookupStudent) : { fees: [], pending: [], dueAmount: 0 };
 
-  // Memoize quick actions with useCallback for handlers
-  const handleSetActiveSection = useCallback((section: typeof activeSection) => {
-    setActiveSection(section);
-  }, []);
-
-  const handleShowStudentNotificationModal = useCallback(() => {
-    setShowStudentNotificationModal(true);
-  }, []);
-
-  const handleShowPrincipalRemarksModal = useCallback(() => {
-    setShowPrincipalRemarksModal(true);
-  }, []);
-
-  const handleShowStudentLookupModal = useCallback(() => {
-    setShowStudentLookupModal(true);
-  }, []);
-
-  const quickActions = useMemo(() => [
-    { icon: Bell, label: "Send Announcement", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("announcements") },
-    { icon: MessageSquare, label: "Notify Students", color: "from-blue-600 to-purple-600", action: handleShowStudentNotificationModal },
-    { icon: Star, label: "Principal Remarks", color: "from-sky-400 to-purple-600", action: handleShowPrincipalRemarksModal },
-    { icon: Search, label: "Student Lookup", color: "from-blue-600 to-purple-600", action: handleShowStudentLookupModal },
-    { icon: Mail, label: "See Contact Form", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("contactforms") },
-    { icon: BookOpen, label: "Yearly Books", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("booksmanager") },
-    { icon: Calendar, label: "Exam Routine", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("examroutine") },
-    { icon: Settings, label: "Branding & Logo", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("branding") },
-    { icon: Clock, label: "Manage Timetable", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("timetable") },
-    { icon: GraduationCap, label: "Edit Admissions Page", color: "from-blue-600 to-purple-600", action: () => handleSetActiveSection("admissionsmanager") },
-    { icon: Trophy, label: "Top Scorers Content", color: "from-sky-400 to-purple-600", action: () => handleSetActiveSection("topscorerslearnmore") },
+  const quickActions = [
+    { icon: Bell, label: "Send Announcement", color: "from-blue-600 to-purple-600", action: () => setActiveSection("announcements") },
+    { icon: MessageSquare, label: "Notify Students", color: "from-blue-600 to-purple-600", action: () => setShowStudentNotificationModal(true) },
+    { icon: Star, label: "Principal Remarks", color: "from-sky-400 to-purple-600", action: () => setShowPrincipalRemarksModal(true) },
+    { icon: Search, label: "Student Lookup", color: "from-blue-600 to-purple-600", action: () => setShowStudentLookupModal(true) },
+    { icon: Mail, label: "See Contact Form", color: "from-sky-400 to-purple-600", action: () => setActiveSection("contactforms") },
+    { icon: BookOpen, label: "Yearly Books", color: "from-blue-600 to-purple-600", action: () => setActiveSection("booksmanager") },
+    { icon: Calendar, label: "Exam Routine", color: "from-sky-400 to-purple-600", action: () => setActiveSection("examroutine") },
+    { icon: Settings, label: "Branding & Logo", color: "from-blue-600 to-purple-600", action: () => setActiveSection("branding") },
+    { icon: Clock, label: "Manage Timetable", color: "from-sky-400 to-purple-600", action: () => setActiveSection("timetable") },
+    { icon: GraduationCap, label: "Edit Admissions Page", color: "from-blue-600 to-purple-600", action: () => setActiveSection("admissionsmanager") },
+    { icon: Trophy, label: "Top Scorers Content", color: "from-sky-400 to-purple-600", action: () => setActiveSection("topscorerslearnmore") },
     // New quick actions for Bus Tracking IDs
     { icon: IdCard, label: "Create Bus ID", color: "from-blue-600 to-purple-600", action: () => navigate('/create-bus-id') },
     { icon: IdCard, label: "Manage Bus IDs", color: "from-sky-400 to-purple-600", action: () => navigate('/manage-bus-id') }
-  ], [handleSetActiveSection, handleShowStudentNotificationModal, handleShowPrincipalRemarksModal, handleShowStudentLookupModal, navigate]);
+  ];
 
-  // Precompute filtered teachers list for Manage Teachers (memoized for performance)
-  const filteredTeachers = useMemo(() => {
-    return teachers
-      .filter(t => (teacherSubjectFilter ? (t.subject || '').toLowerCase() === teacherSubjectFilter.toLowerCase() : true))
-      .filter(t => (teacherStatusFilter ? t.status === (teacherStatusFilter as 'active' | 'banned') : true))
-      .filter(t => {
-        const q = teacherSearch.trim().toLowerCase();
-        if (!q) return true;
-        return (
-          (t.name || '').toLowerCase().includes(q) ||
-          (t.email || '').toLowerCase().includes(q) ||
-          (t.subject || '').toLowerCase().includes(q)
-        );
-      });
-  }, [teachers, teacherSubjectFilter, teacherStatusFilter, teacherSearch]);
+  // Precompute filtered teachers list for Manage Teachers
+  const filteredTeachers = teachers
+    .filter(t => (teacherSubjectFilter ? (t.subject || '').toLowerCase() === teacherSubjectFilter.toLowerCase() : true))
+    .filter(t => (teacherStatusFilter ? t.status === (teacherStatusFilter as 'active' | 'banned') : true))
+    .filter(t => {
+      const q = teacherSearch.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        (t.name || '').toLowerCase().includes(q) ||
+        (t.email || '').toLowerCase().includes(q) ||
+        (t.subject || '').toLowerCase().includes(q)
+      );
+    });
 
   useEffect(() => {
     if (!principalRemarksForm.studentId) return;
@@ -1421,7 +1394,7 @@ Teacher ID: ${teacherId}`);
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card/95 backdrop-blur-none sm:backdrop-blur-md border-b border-border/50 sticky top-0 z-50 will-change-transform"
+        className="bg-card/95 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 will-change-transform"
       >
         <div className="container-wide py-3 sm:py-4">
           <div className="flex items-center justify-between">
@@ -1734,7 +1707,7 @@ Teacher ID: ${teacherId}`);
                               setBusReplyImgs([null, null, null, null]);
                             }} variant="outline">Cancel</Button>
                           )}
-                          <Button onClick={editingBusReplyId ? editBusReply : sendBusReply} disabled={!selectedBusUserId || !busReplyText.trim()}>{editingBusReplyId ? 'Update' : 'Send'} Reply</Button>
+                          <Button onClick={editingBusReplyId ? editBusReply : sendBusReply} disabled={!selectedBusUserId || !busReplyText.trim()} className="text-white bg-gradient-to-r from-gold to-yellow-500">{editingBusReplyId ? 'Update' : 'Send'} Reply</Button>
                         </div>
                       </div>
                     </div>
@@ -1762,18 +1735,18 @@ Teacher ID: ${teacherId}`);
             <>
               {/* Stats Grid */}
               <motion.div
-                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1 } : { opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 }}
+                transition={{ delay: 0.1 }}
                 className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8"
               >
                 {stats.map((stat, index) => (
                   <motion.div
                     key={stat.label}
-                    initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1 } : { opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 + index * 0.1 }}
-                    className="bg-card/95 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200"
+                    transition={{ delay: 0.1 + index * 0.1 }}
+                    className="bg-card/95 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200 will-change-transform"
                   >
                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-royal/20 to-gold/20 flex items-center justify-center">
@@ -1797,9 +1770,9 @@ Teacher ID: ${teacherId}`);
                   transition={{ delay: 0.3 }}
                   className="lg:col-span-2"
                 >
-                  <div className="bg-card/95 backdrop-blur-md rounded-lg sm:rounded-xl p-4 sm:p-6 border border-border/50 will-change-auto">
+                  <div className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-4 sm:p-6 border border-gold/40 will-change-auto">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                      <h2 className="text-base sm:text-lg font-heading font-bold text-foreground flex-1">
+                      <h2 className="text-base sm:text-lg lg:text-xl font-heading font-bold bg-gradient-to-r from-gold via-yellow-400 to-sky-400 bg-clip-text text-transparent flex-1">
                         Quick Actions
                       </h2>
                       <div className="relative">
@@ -1813,72 +1786,32 @@ Teacher ID: ${teacherId}`);
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:grid-cols-3 lg:gap-3">
-                      {quickActions
-                        .filter(action => 
-                          action.label.toLowerCase().includes(debouncedQuickActionsSearch.toLowerCase())
-                        )
-                        .map((action, index) => (
-                      <motion.button
-                        key={action.label}
-                        initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.4 + index * 0.1 }}
-                        whileHover={deviceCapability.isLowEnd ? {} : { scale: 1.02 }}
-                        whileTap={deviceCapability.isLowEnd ? {} : { scale: 0.98 }}
-                        onClick={action.action}
-                        className="relative p-2 sm:p-3 lg:p-4 rounded-2xl transition-all duration-200 text-white group touch-manipulation overflow-hidden"
-                      >
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 via-transparent to-transparent opacity-0 group-hover:opacity-80 blur-xl transition duration-300 pointer-events-none" />
-                        <div className={`relative bg-gradient-to-r ${action.color} p-3 sm:p-4 lg:p-5 rounded-2xl shadow-[0_8px_32px_rgba(88,28,135,0.3)] hover:shadow-[0_12px_48px_rgba(88,28,135,0.5)] border border-white/20 group-hover:border-white/40 transition-all duration-300`}>
-                            <action.icon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white mb-2 sm:mb-2 lg:mb-3 mx-auto" />
-                            <p className="text-[11px] sm:text-sm lg:text-base font-semibold text-white text-center leading-tight px-1">
-                              {action.label === "Principal Remarks" ? (
-                                <>
-                                  <span className="sm:hidden">Remarks</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Edit Admissions Page" ? (
-                                <>
-                                  <span className="sm:hidden">Admissions</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Branding & Logo" ? (
-                                <>
-                                  <span className="sm:hidden">Logo</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Send Announcement" ? (
-                                <>
-                                  <span className="sm:hidden">Announce</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Notify Students" ? (
-                                <>
-                                  <span className="sm:hidden">Notify</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Manage Timetable" ? (
-                                <>
-                                  <span className="sm:hidden">Timetable</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Exam Routine" ? (
-                                <>
-                                  <span className="sm:hidden">Exams</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : action.label === "Yearly Books" ? (
-                                <>
-                                  <span className="sm:hidden">Books</span>
-                                  <span className="hidden sm:inline">{action.label}</span>
-                                </>
-                              ) : (
-                                action.label
-                              )}                            </p>
-                          </div>
-                        </motion.button>
-                      ))}
+                    <div className="rounded-md overflow-hidden bg-border/30 sm:bg-transparent">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 sm:gap-3 lg:gap-4">
+                        {quickActions
+                          .filter(action => action.label.toLowerCase().includes(quickActionsSearch.toLowerCase()))
+                          .map((action, index) => (
+                            <motion.div
+                              key={action.label}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.4 + index * 0.05 }}
+                              onClick={action.action}
+                              className="p-3 sm:p-4 lg:p-4 rounded-lg bg-card/80 border border-border/30 hover:bg-card/95 transition-shadow duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md"
+                            >
+                              <div className="flex flex-col items-center justify-center text-center w-full">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-royal/10 to-sky-200/5 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                  <action.icon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-gold" />
+                                </div>
+                                <div className="flex-1 min-w-0 w-full">
+                                  <h3 className="font-semibold text-foreground text-sm sm:text-base lg:text-sm leading-tight text-center px-1 break-words">
+                                    {action.label}
+                                  </h3>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -1924,15 +1857,15 @@ Teacher ID: ${teacherId}`);
                       { title: "Manage Teacher IDs", desc: "View and manage teacher login credentials", icon: IdCard, action: () => setActiveSection("manageteacherid") },
                       { title: "Price Management", desc: "Update admission fees and pricing", icon: DollarSign, action: () => setActiveSection("pricemanagement") }
                     ].filter(item => {
-                      if (!debouncedContentManagementSearch.trim()) return true;
-                      const searchLower = debouncedContentManagementSearch.toLowerCase();
+                      if (!contentManagementSearch.trim()) return true;
+                      const searchLower = contentManagementSearch.toLowerCase();
                       const titleLower = item.title.toLowerCase();
                       const descLower = item.desc.toLowerCase();
                       return titleLower.includes(searchLower) || descLower.includes(searchLower);
                     }).map((item, index) => (
                       <motion.div
                         key={item.title}
-                        initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 + index * 0.1 }}
                         onClick={item.action}
@@ -2665,7 +2598,7 @@ Teacher ID: ${teacherId}`);
 
           {/* Edit Teacher Modal */}
           {editTeacher && (
-          <div className="fixed inset-0 z-50 bg-black/60 sm:backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setEditTeacher(null)}>
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setEditTeacher(null)}>
               <div className="bg-background rounded-2xl shadow-2xl w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between p-4 border-b border-border">
                   <h3 className="text-lg font-heading font-bold">Edit Teacher</h3>
@@ -5360,7 +5293,7 @@ Teacher ID: ${teacherId}`);
 
         {/* Delete Confirmation Modal */}
         {deleteConfirmModal.show && (
-          <div className="fixed inset-0 z-50 bg-black/60 sm:backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDeleteConfirmModal({ show: false, admissionId: null, studentName: '' })}>
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDeleteConfirmModal({ show: false, admissionId: null, studentName: '' })}>
             <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <h3 className="text-lg font-heading font-bold text-red-600">Confirm Deletion</h3>

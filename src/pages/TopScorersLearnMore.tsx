@@ -115,7 +115,7 @@ const TopScorersLearnMore = () => {
       name: "Emma Richardson",
       role: "Valedictorian 2024",
       quote: "Royal Academy provided me with the perfect environment to excel. The teachers pushed me to reach my potential while supporting every step of my journey.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80",
+      image: "/placeholder-image.svg",
       achievement: "Harvard University - Full Scholarship"
     },
     {

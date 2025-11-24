@@ -156,7 +156,7 @@ const TopScorersManager = () => {
     setEditingStudent({
       ...editingStudent,
       images: updatedImages,
-      image: updatedImages[0] || "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80"
+      image: updatedImages[0] || "/placeholder-image.svg"
     });
   };
 
@@ -182,7 +182,7 @@ const TopScorersManager = () => {
       year: "2024",
       rank: 1,
       achievements: [],
-      image: "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80",
+      image: "/placeholder-image.svg",
       images: [],
       description: "",
       fullBio: "",

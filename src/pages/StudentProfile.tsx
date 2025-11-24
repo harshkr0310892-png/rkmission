@@ -33,8 +33,8 @@ const StudentProfile = () => {
       year: "2024",
       rank: 1,
       achievements: ["Valedictorian", "Science Olympiad Gold", "Math Competition Winner"],
-      image: "https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80",
-      images: ["https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80"],
+      image: "/placeholder-image.svg",
+      images: ["/placeholder-image.svg"],
       description: "Outstanding performance across all subjects with exceptional leadership qualities.",
       fullBio: "Emma Richardson has consistently demonstrated exceptional academic prowess throughout her time at Royal Academy. As our current valedictorian, she has maintained the highest GPA in school history while actively participating in numerous extracurricular activities. Her leadership in student government and dedication to community service make her a role model for future students.",
       subjects: [

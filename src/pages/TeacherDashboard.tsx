@@ -1,9 +1,7 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useDeviceCapability } from "@/hooks/use-device-capability";
-import { useDebounce } from "@/hooks/use-debounce";
 import { 
   Users, 
   BookOpen, 
@@ -38,6 +36,7 @@ import {
   Upload,
   Lock,
   Image,
+  Volume2, // Import Volume2 icon for Principal Audio
   Video, // Import Video icon for Live Teaching
   Save
 } from "lucide-react";
@@ -190,7 +189,6 @@ interface PrincipalRemark {
 }
 
 const TeacherDashboard = () => {
-  const deviceCapability = useDeviceCapability();
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherSubject, setTeacherSubject] = useState("");
@@ -324,11 +322,8 @@ const TeacherDashboard = () => {
   const [showTeacherNotifications, setShowTeacherNotifications] = useState(false);
   const [teacherNotifications, setTeacherNotifications] = useState<Notification[]>([]);
   const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
-  // Memoize unread count for header bell for performance
-  const unreadTeacherNotifications = useMemo(() => 
-    teacherNotifications.filter(n => n.status === 'unread').length, 
-    [teacherNotifications]
-  );
+  // Unread count for header bell
+  const unreadTeacherNotifications = teacherNotifications.filter(n => n.status === 'unread').length;
   const [showEditNotificationModal, setShowEditNotificationModal] = useState(false);
   const [editNotificationForm, setEditNotificationForm] = useState({
     subject: '',
@@ -1074,7 +1069,7 @@ Student ID: ${studentId}`);
     return students.filter(s => {
       const byClass = paymentFilterClass ? s.class === paymentFilterClass : true;
       const bySection = paymentFilterSection ? s.section === paymentFilterSection : true;
-      const byRoll = debouncedPaymentFilterRoll ? s.rollNumber.toString() === debouncedPaymentFilterRoll : true;
+      const byRoll = paymentFilterRoll ? s.rollNumber.toString() === paymentFilterRoll : true;
       return byClass && bySection && byRoll;
     });
   };
@@ -1563,7 +1558,7 @@ Student ID: ${studentId}`);
   return (
     <div className="min-h-screen bg-gradient-to-br from-royal via-royal/90 to-gold/20">
       {/* Royal Header */}
-      <div className="bg-gradient-to-r from-royal via-purple-900 to-royal backdrop-blur-none sm:backdrop-blur-md border-b border-gold/30 sticky top-0 z-40 shadow-lg">
+      <div className="bg-gradient-to-r from-royal via-purple-900 to-royal backdrop-blur-md border-b border-gold/30 sticky top-0 z-40 shadow-lg">
         <div className="absolute inset-0 bg-gradient-to-r from-gold/10 via-transparent to-gold/10"></div>
         <div className="px-2 py-2 sm:px-4 sm:py-3 lg:px-6 lg:py-6 relative">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
@@ -1826,9 +1821,9 @@ Student ID: ${studentId}`);
             {/* Quick Stats - Mobile Optimized */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
               <motion.div
-                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-card/95 sm:backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
+                className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 space-y-1.5 lg:space-y-0">
                   <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto lg:mx-0">
@@ -1842,10 +1837,10 @@ Student ID: ${studentId}`);
               </motion.div>
 
               <motion.div
-                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 }}
-                className="bg-card/95 sm:backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
+                transition={{ delay: 0.1 }}
+                className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 space-y-1.5 lg:space-y-0">
                   <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full bg-green-500/20 flex items-center justify-center mx-auto lg:mx-0">
@@ -1862,7 +1857,7 @@ Student ID: ${studentId}`);
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-card/95 sm:backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
+                className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 space-y-1.5 lg:space-y-0">
                   <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto lg:mx-0">
@@ -1876,9 +1871,9 @@ Student ID: ${studentId}`);
               </motion.div>
 
               <motion.div
-                initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.3 }}
+                transition={{ delay: 0.3 }}
                 className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-3 lg:p-6 border border-border/50"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 space-y-1.5 lg:space-y-0">
@@ -1909,13 +1904,13 @@ Student ID: ${studentId}`);
                   { title: "Create Student ID", desc: "Register new students", icon: UserPlus, action: () => setActiveSection("createstudent") },
                   { title: "View Students", desc: "Manage student records", icon: Users, action: () => setActiveSection("students") },
                   { title: "Add Remarks", desc: "Give good/bad remarks", icon: MessageSquare, action: () => setActiveSection("remarks") },
-                  { title: "Fee Management", desc: "Manage student fees", icon: CreditCard, action: () => setActiveSection("fees") },
+                  { title: "Fee Management", desc: "Manage student fees", icon: CreditCard, action: () => setActiveSection("fees") }
                 ].map((item, index) => (
                   <motion.div
                     key={item.title}
-                    initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.5 + index * 0.05 }}
+                    transition={{ delay: 0.5 + index * 0.05 }}
                     onClick={item.action}
                     className="p-3 sm:p-4 lg:p-4 rounded-lg bg-card/80 border border-border/30 hover:bg-card/95 transition-shadow duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md"
                   >
@@ -2004,7 +1999,7 @@ Student ID: ${studentId}`);
             className="space-y-4 sm:space-y-6"
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
-              <h2 className="text-lg sm:text-2xl font-heading font-bold text-black dark:text-foreground">Homework Management</h2>
+              <h2 className="text-lg sm:text-2xl font-heading font-bold text-white">Homework Management</h2>
               <Button
                 onClick={() => setShowHomeworkModal(true)}
                 className="bg-gradient-to-r from-gold to-yellow-500 text-black h-9 sm:h-10 w-full sm:w-auto"
@@ -2064,7 +2059,7 @@ Student ID: ${studentId}`);
 
       {/* Homework Modal */}
       {showHomeworkModal && (
-        <div className="fixed inset-0 bg-black/60 sm:backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -5011,7 +5006,7 @@ Student ID: ${studentId}`);
             animate={{ opacity: 1, scale: 1 }}
             className="bg-card rounded-xl p-6 w-full max-w-lg border border-border/50 max-h-[85vh] overflow-y-auto"
           >
-            <div className="sticky top-0 -mx-6 -mt-6 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 bg-card/95 sm:backdrop-blur z-10 border-b border-border/50 flex items-center justify-between">
+            <div className="sticky top-0 -mx-6 -mt-6 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 bg-card/95 backdrop-blur z-10 border-b border-border/50 flex items-center justify-between">
               <h3 className="text-base sm:text-lg font-semibold text-foreground">
                 Send Notification to Students
               </h3>
@@ -5288,7 +5283,7 @@ Student ID: ${studentId}`);
             animate={{ opacity: 1, scale: 1 }}
             className="bg-card rounded-xl p-6 w-full max-w-md border border-border/50 max-h-[85vh] overflow-y-auto"
           >
-            <div className="sticky top-0 -mx-6 -mt-6 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 bg-card/95 sm:backdrop-blur z-10 border-b border-border/50 flex items-center justify-between">
+            <div className="sticky top-0 -mx-6 -mt-6 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 bg-card/95 backdrop-blur z-10 border-b border-border/50 flex items-center justify-between">
               <h3 className="text-base sm:text-lg font-semibold text-foreground">
                 Send Notification to Principal
               </h3>

@@ -34,7 +34,7 @@ const AboutFixed = () => {
       name: "Dr. Sarah Johnson",
       position: "Principal",
       description: "Dr. Sarah Johnson brings over 20 years of educational leadership experience to Royal Academy.",
-      photos: ["https://images.unsplash.com/photo-1494790108755-2616c669-b163?w=400&h=400&fit=crop&crop=face&auto=format&q=80"],
+      photos: ["/placeholder-image.svg"],
       email: "principal@royalacademy.edu",
       phone: "+1 (555) 123-4567",
       qualifications: "Ph.D. in Educational Administration",

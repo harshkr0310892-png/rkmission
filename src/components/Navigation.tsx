@@ -623,11 +623,12 @@ const Navigation = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0, y: -20 }}
-              animate={{ opacity: 1, height: "auto", y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="sm:hidden border-t border-blue-400/30 bg-gradient-to-b from-blue-950/80 to-blue-900/60 backdrop-blur-xl"
+              initial={{ opacity: 0, scaleY: 0 }}
+              animate={{ opacity: 1, scaleY: 1 }}
+              exit={{ opacity: 0, scaleY: 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              style={{ transformOrigin: "top", willChange: "transform, opacity" }}
+              className="sm:hidden border-t border-blue-400/30 bg-gradient-to-b from-blue-950/80 to-blue-900/60 backdrop-blur-md"
             >
               <div className="p-4 space-y-1 max-h-[70vh] overflow-y-auto">
                 {navItems.map((item) => (

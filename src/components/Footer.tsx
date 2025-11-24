@@ -130,17 +130,18 @@ const Footer = () => {
       <AnimatePresence>
         {expandedSections[sectionKey] && (
           <motion.div
-            initial={{ height: 0, opacity: 0, y: -10 }}
-            animate={{ height: "auto", opacity: 1, y: 0 }}
-            exit={{ height: 0, opacity: 0, y: -10 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            initial={{ opacity: 0, scaleY: 0 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            exit={{ opacity: 0, scaleY: 0 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            style={{ transformOrigin: "top", willChange: "transform, opacity" }}
             className="overflow-hidden"
           >
             <motion.div 
               className="pb-4 px-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.15, duration: 0.3 }}
+              transition={{ duration: 0.18 }}
             >
               {children}
             </motion.div>
@@ -171,9 +172,7 @@ const Footer = () => {
                   transition={{ duration: 0 }}
                   src={brandingData.logoUrl}
                   alt={brandingData.schoolName}
-                  className="h-10 w-10 flex-shrink-0 animate-glow"
-                  loading="lazy"
-                  decoding="async"
+                  className={`${(brandingData.logoUrl || '').includes('placeholder.svg') ? 'h-8 w-8' : 'h-10 w-10'} flex-shrink-0 animate-glow`}
                 />
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-base font-semibold text-white truncate">

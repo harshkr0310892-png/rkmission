@@ -105,7 +105,7 @@ function NewsletterForm() {
           value={state.email}
           onChange={handleInputChange}
           placeholder="Enter your email"
-          className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-gold text-black dark:text-foreground"
+          className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-gold text-foreground"
           required
         />
         {state.errors.length > 0 && (
@@ -117,7 +117,7 @@ function NewsletterForm() {
         whileTap={{ scale: 0.95 }}
         type="submit"
         disabled={state.isSubmitting}
-        className="btn-gold px-6 py-3 font-semibold rounded-lg text-black whitespace-nowrap"
+        className="btn-gold px-6 py-3 font-semibold rounded-lg whitespace-nowrap"
       >
         {state.isSubmitting ? 'Subscribing...' : 'Subscribe'}
       </motion.button>

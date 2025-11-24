@@ -393,7 +393,7 @@
     position: relative;
     overflow: hidden;
     font-weight: 600;
-    color: hsl(var(--background));
+    color: hsl(var(--foreground));
     background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-light)));
     box-shadow: var(--shadow-gold);
     transition: all 0.3s;
@@ -2503,10 +2503,4 @@ body.menu-open .navbar-glass {
   overflow-wrap: anywhere;
   word-break: break-word;
   hyphens: auto;
-}
-.clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }

@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useDeviceCapability } from "@/hooks/use-device-capability";
 import { subscribeToSupabaseChanges, setSupabaseData } from "@/lib/supabaseHelpers";
 import { useTranslation } from "@/hooks/useTranslation";
 import { 
@@ -94,7 +93,6 @@ interface PaymentRequest {
 }
 
 const StudentDashboard = () => {
-  const deviceCapability = useDeviceCapability();
   const { t } = useTranslation();
   const [studentData, setStudentData] = useState<StudentData | null>(null);
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -382,8 +380,7 @@ const StudentDashboard = () => {
     setPaymentRequests(studentPaymentRequests);
   };
 
-  // Memoize fee status calculations for performance
-  const feeStatus = useMemo(() => {
+  const getMyFeeStatus = () => {
     const pendingFees = feeRecords.filter(fee => fee.status === 'pending');
     const paidFees = feeRecords.filter(fee => fee.status === 'paid');
     const totalPending = pendingFees.reduce((sum, fee) => sum + fee.amount, 0);
@@ -397,17 +394,7 @@ const StudentDashboard = () => {
       pendingMonths: pendingFees.map(fee => fee.month),
       paidMonths: paidFees.map(fee => fee.month)
     };
-  }, [feeRecords]);
-
-  // Memoize remarks counts for performance (must be at top level, not in JSX)
-  const goodRemarksCount = useMemo(() => 
-    studentRemarks.filter(r => r.type === 'good').length, 
-    [studentRemarks]
-  );
-  const badRemarksCount = useMemo(() => 
-    studentRemarks.filter(r => r.type === 'bad').length, 
-    [studentRemarks]
-  );
+  };
 
   const handlePayFees = (paymentRequest: PaymentRequest) => {
     setSelectedPaymentRequest(paymentRequest);
@@ -847,18 +834,18 @@ const StudentDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
       <motion.header
-        initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative bg-gradient-to-r from-slate-950 via-blue-950 to-slate-950 backdrop-blur-none sm:backdrop-blur-xl border-b border-gradient-to-r from-gold/30 via-blue-400/30 to-gold/30 sticky top-0 z-50 shadow-md sm:shadow-2xl shadow-black/50 overflow-hidden"
+        className="relative bg-gradient-to-r from-slate-950 via-blue-950 to-slate-950 backdrop-blur-xl border-b border-gradient-to-r from-gold/30 via-blue-400/30 to-gold/30 sticky top-0 z-50 shadow-2xl shadow-black/50 overflow-hidden"
       >
         {/* Animated Background Effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Royal Blue Glow */}
-          <div className="absolute -left-40 -top-40 w-80 h-80 bg-royal/10 rounded-full blur-3xl animate-pulse hidden sm:block"></div>
+          <div className="absolute -left-40 -top-40 w-80 h-80 bg-royal/10 rounded-full blur-3xl animate-pulse"></div>
           {/* Gold Glow */}
-          <div className="absolute -right-40 -bottom-40 w-80 h-80 bg-gold/10 rounded-full blur-3xl animate-pulse hidden sm:block" style={{ animationDelay: "1s" }}></div>
+          <div className="absolute -right-40 -bottom-40 w-80 h-80 bg-gold/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
           {/* Cyan Accent */}
-          <div className="absolute top-1/2 left-1/2 w-96 h-40 bg-cyan-500/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 hidden sm:block"></div>
+          <div className="absolute top-1/2 left-1/2 w-96 h-40 bg-cyan-500/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
         </div>
 
         <div className="container-wide py-3 sm:py-5 px-3 sm:px-4 relative z-10">
@@ -954,18 +941,18 @@ const StudentDashboard = () => {
       <div className="container-wide py-4 sm:py-8 px-3 sm:px-6">
         {/* Stats Grid */}
         <motion.div
-          initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 }}
+          transition={{ delay: 0.1 }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8"
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.1 + index * 0.1 }}
-              className="bg-card/95 sm:backdrop-blur-md rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200"
+              transition={{ delay: 0.1 + index * 0.1 }}
+              className="bg-card/95 backdrop-blur-md rounded-xl p-3 sm:p-6 border border-border/50 hover:shadow-lg transition-all duration-200"
             >
               <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-royal/20 to-gold/20 flex items-center justify-center">
@@ -984,11 +971,11 @@ const StudentDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
           {/* Upcoming Events */}
           <motion.div
-            initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.3 }}
+            transition={{ delay: 0.3 }}
           >
-            <div className="bg-card/95 sm:backdrop-blur-md rounded-xl p-4 sm:p-6 border border-border/50">
+            <div className="bg-card/95 backdrop-blur-md rounded-xl p-4 sm:p-6 border border-border/50">
               <h2 className="text-lg font-heading font-bold text-foreground mb-6">
                 Upcoming Events
               </h2>
@@ -1029,7 +1016,7 @@ const StudentDashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="bg-card/95 sm:backdrop-blur-md rounded-xl p-4 sm:p-6 border border-border/50">
+            <div className="bg-card/95 backdrop-blur-md rounded-xl p-4 sm:p-6 border border-border/50">
               <h2 className="text-lg font-heading font-bold text-foreground mb-6">
                 Academic Progress
               </h2>
@@ -1082,68 +1069,46 @@ const StudentDashboard = () => {
           transition={{ delay: 0.6 }}
           className="mt-4 sm:mt-8"
         >
-          <style>{`
-            @keyframes neon-glow {
-              0%, 100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.5), 0 0 20px rgba(0, 212, 255, 0.3), inset 0 0 20px rgba(255, 193, 7, 0.1); }
-              50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(0, 212, 255, 0.5), inset 0 0 20px rgba(255, 193, 7, 0.2); }
-            }
-            @keyframes float-neon {
-              0%, 100% { transform: translateY(0px); }
-              50% { transform: translateY(-4px); }
-            }
-          `}</style>
-          <div className="bg-card/95 backdrop-blur-md rounded-xl p-4 sm:p-6 border-2 border-gold/30 shadow-[0_0_30px_rgba(255,193,7,0.25),0_0_20px_rgba(0,212,255,0.15)]">
-            <h2 className="text-base sm:text-lg font-heading font-bold bg-gradient-to-r from-gold via-yellow-400 to-cyan-400 bg-clip-text text-transparent mb-4 sm:mb-6">
+          <div className="bg-card/95 backdrop-blur-md rounded-lg lg:rounded-xl p-4 sm:p-6 border border-gold/40">
+            <h2 className="text-base sm:text-lg lg:text-xl font-heading font-bold bg-gradient-to-r from-gold via-yellow-400 to-sky-400 bg-clip-text text-transparent mb-4 sm:mb-6">
               {t("quickActions")}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
-              {useMemo(() => {
-                const unreadNotificationsCount = studentNotifications.filter(n => n.status === 'unread').length;
-                return [
-                { title: t("aiAssistant"), icon: Bot, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => navigate('/student-ai-assistant') },
-                { title: t("notificationsPanelTitle"), icon: Bell, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => navigate('/student-notifications'), badge: unreadNotificationsCount },
-                { title: t("viewGrades"), icon: BarChart3, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => setShowGradesModal(true) },
-                { title: "Assignments", icon: FileText, borderColor: "from-yellow-400 to-gold", textColor: "text-yellow-400", action: () => {
-                  loadAssignments(); // Refresh assignments when opening
-                  setShowAssignmentsModal(true);
-                } },
-                { title: "Attendance", icon: Calendar, borderColor: "from-gold to-yellow-400", textColor: "text-yellow-400", action: () => setShowAttendanceModal(true) },
-                { title: "Remarks", icon: Star, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => {
-                  // Force refresh remarks data
-                  setTimeout(() => {
-                    loadStudentRemarks();
-                  }, 100);
-                  setShowRemarksModal(true);
-                } },
-                { title: "Timetable", icon: Clock, borderColor: "from-yellow-400 to-gold", textColor: "text-yellow-400", action: () => navigate('/student-timetable') },
-                { title: "AI Quiz", icon: GraduationCap, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => navigate('/student-quiz') },
-                { title: "Track Bus", icon: MapPin, borderColor: "from-gold to-yellow-400", textColor: "text-yellow-400", action: () => navigate('/student-track-bus') },
-                { title: "Fees", icon: CreditCard, borderColor: "from-cyan-400 to-blue-500", textColor: "text-cyan-400", action: () => setActiveSection("fees") },
-                { title: "Principal Remarks", icon: Star, borderColor: "from-blue-400 to-cyan-500", textColor: "text-blue-400", action: () => setShowPrincipalRemarksModal(true) }
-              ];
-              }, [t, navigate, studentNotifications]).map((action, index) => (
-                <motion.button
-                  key={action.title}
-                  initial={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={deviceCapability.prefersReducedMotion || deviceCapability.isLowEnd ? { duration: 0 } : { delay: 0.7 + index * 0.05 }}
-                  whileHover={deviceCapability.isLowEnd ? {} : { scale: 1.08 }}
-                  whileTap={deviceCapability.isLowEnd ? {} : { scale: 0.92 }}
-                  onClick={action.action}
-                  className="square-glass-btn flex flex-col items-center justify-center gap-2 relative group"
-                  style={{ padding: '16px 20px' }}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 sm:gap-3 lg:gap-4">
+              {[
+                { title: t("aiAssistant"), desc: "Smart assistant", icon: Bot, action: () => navigate('/student-ai-assistant') },
+                { title: t("notificationsPanelTitle"), desc: "Your notifications", icon: Bell, action: () => navigate('/student-notifications'), badge: studentNotifications.filter(n => n.status === 'unread').length },
+                { title: t("viewGrades"), desc: "Reports & grades", icon: BarChart3, action: () => setShowGradesModal(true) },
+                { title: "Assignments", desc: "View assignments", icon: FileText, action: () => { loadAssignments(); setShowAssignmentsModal(true); } },
+                { title: "Attendance", desc: "My attendance", icon: Calendar, action: () => setShowAttendanceModal(true) },
+                { title: "Remarks", desc: "Teacher remarks", icon: Star, action: () => { setTimeout(() => { loadStudentRemarks(); }, 100); setShowRemarksModal(true); } },
+                { title: "Timetable", desc: "Class schedule", icon: Clock, action: () => navigate('/student-timetable') },
+                { title: "AI Quiz", desc: "Practice quizzes", icon: GraduationCap, action: () => navigate('/student-quiz') },
+                { title: "Track Bus", desc: "Live bus tracking", icon: MapPin, action: () => navigate('/student-track-bus') },
+                { title: "Fees", desc: "Manage fees", icon: CreditCard, action: () => setActiveSection("fees") },
+                { title: "Principal Remarks", desc: "Remarks from principal", icon: Star, action: () => setShowPrincipalRemarksModal(true) }
+              ].map((item, index) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 + index * 0.05 }}
+                  onClick={item.action}
+                  className="p-3 sm:p-4 lg:p-4 rounded-lg bg-card/80 border border-border/30 hover:bg-card/95 transition-shadow duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-md"
                 >
-                  <action.icon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-900 drop-shadow-lg" />
-                  <p className="text-[11px] sm:text-xs md:text-sm font-bold text-center text-black line-clamp-2">
-                    {action.title}
-                  </p>
-                  {/* Notification Badge */}
-                  {action.badge && action.badge > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-gold text-black text-[9px] sm:text-[10px] font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center animate-pulse shadow-lg shadow-yellow-400/50">
-                      {action.badge}
-                    </span>
-                  )}
-                </motion.button>
+                  <div className="flex flex-col items-center justify-center text-center w-full">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-royal/10 to-sky-200/5 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <item.icon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-gold" />
+                    </div>
+                    <div className="flex-1 min-w-0 w-full">
+                      <h3 className="font-semibold text-foreground text-sm sm:text-base lg:text-sm leading-tight text-center px-1 break-words">
+                        {item.title}
+                      </h3>
+                      <p className="text-[11px] sm:text-sm text-muted-foreground leading-tight block text-center px-2 break-words mt-1">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -1655,13 +1620,13 @@ const StudentDashboard = () => {
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="bg-green-500/10 rounded-lg p-3 sm:p-4 text-center border border-green-500/30">
                     <div className="text-xl sm:text-2xl font-bold text-green-400">
-                      {goodRemarksCount}
+                      {studentRemarks.filter(r => r.type === 'good').length}
                     </div>
                     <div className="text-xs sm:text-sm text-green-400">Good Remarks</div>
                   </div>
                   <div className="bg-red-500/10 rounded-lg p-3 sm:p-4 text-center border border-red-500/30">
                     <div className="text-xl sm:text-2xl font-bold text-red-400">
-                      {badRemarksCount}
+                      {studentRemarks.filter(r => r.type === 'bad').length}
                     </div>
                     <div className="text-xs sm:text-sm text-red-400">Areas to Improve</div>
                   </div>
@@ -1922,7 +1887,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-base sm:text-lg font-bold text-foreground">
-                      ₹{feeStatus.totalPaid}
+                      ₹{getMyFeeStatus().totalPaid}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">Total Paid</p>
                   </div>
@@ -1936,7 +1901,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-base sm:text-lg font-bold text-foreground">
-                      ₹{feeStatus.totalPending}
+                      ₹{getMyFeeStatus().totalPending}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">Total Pending</p>
                   </div>
@@ -1950,7 +1915,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <p className="text-base sm:text-lg font-bold text-foreground">
-                      {feeStatus.pendingFees.length}
+                      {getMyFeeStatus().pendingFees.length}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">Pending Months</p>
                   </div>
