@@ -219,29 +219,20 @@ const Facilities = () => {
               return (
                 <motion.div
                   key={facility.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  whileHover={{ 
-                    scale: 1.02, 
-                    rotateY: 5,
-                    z: 50 
-                  }}
-                  transition={{ 
-                    duration: 0.3, 
-                    delay: index * 0.05,
-                    type: "spring",
-                    stiffness: 300
-                  }}
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2, delay: index * 0.03 }}
                   className="card-3d overflow-hidden group cursor-pointer"
                 >
                   <div className="relative">
                     {/* Image/Background */}
-                    <div className={`h-40 sm:h-48 ${facility.image} relative overflow-hidden`}>
+                    <div className={`h-32 sm:h-44 ${facility.image} relative overflow-hidden`}>
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
                       <motion.div
-                        whileHover={{ rotate: 360, scale: 1.2 }}
-                        transition={{ duration: 0.6 }}
-                        className="absolute top-4 sm:top-6 left-4 sm:left-6 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gold/20 backdrop-blur-md flex items-center justify-center"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-3 sm:top-5 left-3 sm:left-5 w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gold/20 backdrop-blur-md flex items-center justify-center"
                       >
                         <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-gold" />
                       </motion.div>
@@ -250,29 +241,29 @@ const Facilities = () => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 + 0.2 }}
-                        className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6"
+                        className="absolute bottom-3 sm:bottom-5 left-3 sm:left-5 right-3 sm:right-5"
                       >
-                        <h3 className="text-xl sm:text-2xl font-heading font-bold text-white mb-2">{facility.title}</h3>
+                        <h3 className="text-base sm:text-xl font-heading font-bold text-white mb-1">{facility.title}</h3>
                       </motion.div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{facility.description}</p>
+                    <div className="p-3 sm:p-5 space-y-2 sm:space-y-3">
+                      <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed">{facility.description}</p>
                       
                       <div className="space-y-2">
-                        <h4 className="font-semibold text-gold text-sm sm:text-base">Key Features:</h4>
-                        <div className="grid grid-cols-2 gap-2">
+                        <h4 className="font-semibold text-gold text-xs sm:text-base">Key Features:</h4>
+                        <div className="grid grid-cols-2 gap-1 sm:gap-2">
                           {facility.features.map((feature, idx) => (
                             <motion.div
                               key={idx}
-                              initial={{ opacity: 0, x: -10 }}
+                              initial={{ opacity: 0, x: -6 }}
                               whileInView={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 + idx * 0.05 }}
+                              transition={{ delay: index * 0.03 + idx * 0.03 }}
                               className="flex items-center space-x-2"
                             >
                               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gold"></div>
-                              <span className="text-xs sm:text-sm text-muted-foreground">{feature}</span>
+                              <span className="text-[11px] sm:text-sm text-muted-foreground">{feature}</span>
                             </motion.div>
                           ))}
                         </div>
