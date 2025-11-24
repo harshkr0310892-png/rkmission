@@ -36,7 +36,7 @@ const Hero = () => {
   const { t } = useTranslation();
   // State for homepage data
   const [homepageData, setHomepageData] = useState<HomepageData>({
-    heroTitle: "Royal Academy",
+    heroTitle: "Ramakrishna Mission",
     heroSubtitle: "Shaping tomorrow's leaders through excellence in education, character development, and innovative learning experiences.",
     heroButtonPrimary: "Apply for Admission",
     heroButtonSecondary: "Discover Our Legacy",
@@ -63,7 +63,7 @@ const Hero = () => {
 
   // State for branding data
   const [brandingData, setBrandingData] = useState({
-    schoolName: "Royal Academy",
+    schoolName: "Ramakrishna Mission",
     tagline: "Excellence in Education",
     logoUrl: ""
   });
@@ -72,8 +72,8 @@ const Hero = () => {
 
   // Load homepage data from Supabase
   useEffect(() => {
-    getSupabaseData('royal-academy-homepage', {
-      heroTitle: "Royal Academy",
+    getSupabaseData('ramakrishna-mission-homepage', {
+      heroTitle: "Ramakrishna Mission",
       heroSubtitle: "Shaping tomorrow's leaders through excellence in education, character development, and innovative learning experiences.",
       heroButtonPrimary: "Apply for Admission",
       heroButtonSecondary: "Discover Our Legacy",
@@ -98,7 +98,7 @@ const Hero = () => {
       }
     }).then(data => {
       setHomepageData({
-        heroTitle: data.heroTitle || "Royal Academy",
+        heroTitle: data.heroTitle || "Ramakrishna Mission",
         heroSubtitle: data.heroSubtitle || "Shaping tomorrow's leaders through excellence in education, character development, and innovative learning experiences.",
         heroButtonPrimary: data.heroButtonPrimary || "Apply for Admission",
         heroButtonSecondary: data.heroButtonSecondary || "Discover Our Legacy",
@@ -137,12 +137,12 @@ const Hero = () => {
   // Load branding data from Supabase
   useEffect(() => {
     getSupabaseData('royal-academy-branding', {
-      schoolName: "Royal Academy",
+      schoolName: "Ramakrishna Mission",
       tagline: "Excellence in Education",
       logoUrl: ""
     }).then(data => {
       setBrandingData({
-        schoolName: data.schoolName || "Royal Academy",
+        schoolName: data.schoolName || "Ramakrishna Mission",
         tagline: data.tagline || "Excellence in Education",
         logoUrl: data.logoUrl || ""
       });
@@ -188,7 +188,7 @@ const Hero = () => {
         /* Hero CTA button styles */
         .btn-blue {
           --btn-gradient-from: #0ea5e9; /* sky-500 */
-          --btn-gradient-to: #6366f1;   /* indigo-500 */
+          --btn-gradient-to: #0f13e0ff;   /* indigo-500 */
           display: inline-flex;
           align-items: center;
           justify-content: center;

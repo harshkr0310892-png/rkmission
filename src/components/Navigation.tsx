@@ -53,20 +53,20 @@ const Navigation = () => {
 
   // Branding state
   const [brandingData, setBrandingData] = useState({
-    schoolName: "Royal Academy",
+    schoolName: "Ramakrishna Mission",
     tagline: "Excellence in Education",
     logoUrl: "/placeholder.svg"
   });
 
   // Load branding data from Supabase
   useEffect(() => {
-    getSupabaseData('royal-academy-branding', {
-      schoolName: "Royal Academy",
+    getSupabaseData('ramakrishna-mission-branding', {
+      schoolName: "Ramakrishna Mission",
       tagline: "Excellence in Education",
       logoUrl: "/placeholder.svg"
     }).then(data => {
       setBrandingData({
-        schoolName: data.schoolName || "Royal Academy",
+        schoolName: data.schoolName || "Ramakrishna Mission",
         tagline: data.tagline || "Excellence in Education",
         logoUrl: data.logoUrl || "/placeholder.svg"
       });
@@ -126,7 +126,7 @@ const Navigation = () => {
 
   // Load notifications from localStorage (connected to principal announcements)
   useEffect(() => {
-    const savedNotifications = localStorage.getItem('royal-academy-announcements');
+    const savedNotifications = localStorage.getItem('ramakrishna-mission-announcements');
     if (savedNotifications) {
       setNotifications(JSON.parse(savedNotifications));
     }
